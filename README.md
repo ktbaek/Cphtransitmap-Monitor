@@ -65,7 +65,9 @@ See `output/` for example exports.
 
 ### Checking against the current map
 These scripts check whether the topology and service patterns shown on the map are consistent
-with the GTFS data.
+with the GTFS data. `config/map_corridors.yml` and `config/map_service_patterns.yml` are a manual
+encoding of what's currently drawn on the map — they are not generated from the GTFS data, and
+need to be kept up to date by hand whenever the map changes.
 - `check_map_corridors.py --schema ... [--corridors ...]`: print-only. Checks `route_stop_triplets`
   against map lines encoded in `config/map_corridors.yml` (per group of agencies, stops by
   `stop_name`, optional `ring: true`, optional `routes:` list of route_short_names). A triplet is
@@ -73,7 +75,7 @@ with the GTFS data.
   out-of-area neighbours are wildcards. Scope is the route's own corridors if the route is listed
   (catches extensions along another line's corridor), otherwise all corridors of its group.
   Reports unknown stops, conflicts, and corridor stops not served by the corridor's routes.
-  `config/map_corridors.yml` currently encodes the whole network: Metro (M1-M4), all S-tog
+  `config/map_corridors.yml` currently encodes the whole rail network: Metro (M1-M4), all S-tog
   lines, the DSB regional corridors (Kystbanen, Øresundsbanen, Vestbanen, and others), every
   Lokaltog line, and Letbanen.
 - `check_map_service_patterns.py --schema ... [--patterns ...]`: print-only. Checks view
