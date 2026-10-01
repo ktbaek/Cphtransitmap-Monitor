@@ -1,0 +1,8 @@
+destination, shape_pt_lat, shape_pt_lon
+nykobing, 55.22, 11.79
+rodvig_faxe, 55.42, 12.19
+korsor, 55.44, 11.72
+kalundborg, 55.63, 11.83
+fyn_jylland, 55.44, 11.65
+sverige, 55.56, 12.88
+europa, 55.43, 11.62

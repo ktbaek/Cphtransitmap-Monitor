@@ -1,0 +1,104 @@
+# Service pattern exceptions for S-tog and Metro lines, as shown on the map.
+# Every route of every agency below is checked, whether or not it's listed under
+# `routes:` — each of its stops is assumed "default" unless overridden there.
+# Categories match view service_pattern's service_category:
+#   all_times, peak_only, weekend_only, weekend_and_evening_only,
+#   weekend_and_daytime_only, weekday_daytime_only, weekday_only
+default: all_times
+
+agencies:
+  - '318'  # DSB S-tog
+  - '319'  # Metroselskabet
+
+routes:
+  A:
+    Virum St.: weekend_and_evening_only
+    Sorgenfri St.: weekend_and_evening_only
+    Jægersborg St.: weekend_and_evening_only
+    Gentofte St.: weekend_and_evening_only
+    Bernstorffsvej St.: weekend_and_evening_only
+    Greve St.: weekend_and_evening_only
+    Karlslunde St.: weekend_and_evening_only
+    Solrød Strand St.: weekend_and_evening_only
+    Jersie St.: weekend_and_evening_only
+    Køge Nord St.: weekend_and_evening_only
+    Ølby St.: weekend_and_evening_only
+    Køge St.: weekend_and_evening_only
+
+  Bx:
+    Buddinge St.: peak_only
+    Kildebakke St.: peak_only
+    Vangede St.: peak_only
+    Dyssegård St.: peak_only
+    Emdrup St.: peak_only
+    Ryparken St.: peak_only
+    Svanemøllen St.: peak_only
+    Nordhavn St.: peak_only
+    Østerport St.: peak_only
+    Nørreport St.: peak_only 
+    Vesterport St.: peak_only
+    København H: peak_only
+    Dybbølsbro St.: peak_only
+    Carlsberg St.: peak_only
+    Valby St.: peak_only
+    Danshøj St.: peak_only
+    Glostrup St.: peak_only
+    Albertslund St.: peak_only
+    Taastrup St.: peak_only
+    Høje Taastrup St.: peak_only
+
+  C:
+    Langgade St.: weekend_and_evening_only
+    Peter Bangs Vej St.: weekend_and_evening_only
+    Jyllingevej St.: weekend_and_evening_only
+    Islev St.: weekend_and_evening_only
+
+  E:
+    Holte St.: weekday_daytime_only
+    Virum St.: weekday_daytime_only 
+    Sorgenfri St.: weekday_daytime_only
+    Lyngby St.: weekday_daytime_only
+    Jægersborg St.: weekday_daytime_only 
+    Gentofte St.: weekday_daytime_only
+    Bernstorffsvej St.: weekday_daytime_only 
+    Hellerup St.: weekday_daytime_only
+    Svanemøllen St.: weekday_daytime_only
+    Nordhavn St.: weekday_daytime_only
+    Østerport St.: weekday_daytime_only
+    Nørreport St.: weekday_daytime_only 
+    Vesterport St.: weekday_daytime_only
+    København H: weekday_daytime_only
+    Dybbølsbro St.: weekday_daytime_only
+    Sydhavn St.: weekday_daytime_only
+    København Syd St.: weekday_daytime_only
+    Vallensbæk St.: weekday_daytime_only
+    Ishøj St.: weekday_daytime_only
+    Hundige St.: weekday_daytime_only
+    Greve St.: weekday_daytime_only
+    Karlslunde St.: weekday_daytime_only
+    Solrød Strand St.: weekday_daytime_only
+    Jersie St.: weekday_daytime_only
+    Køge Nord St.: weekday_daytime_only
+    Ølby St.: weekday_daytime_only
+    Køge St.: weekday_daytime_only
+  
+  H:
+    Østerport St.: weekday_daytime_only
+    Nørreport St.: weekday_daytime_only 
+    Vesterport St.: weekday_daytime_only
+    København H: weekday_daytime_only
+    Dybbølsbro St.: weekday_daytime_only
+    Carlsberg St.: weekday_daytime_only
+    Valby St.: weekday_daytime_only
+    Langgade St.: weekday_daytime_only
+    Peter Bangs Vej St.: weekday_daytime_only
+    Flintholm St.: weekday_daytime_only
+    Vanløse St.: weekday_daytime_only
+    Jyllingevej St.: weekday_daytime_only
+    Islev St.: weekday_daytime_only
+    Husum St.: weekday_daytime_only
+    Herlev St.: weekday_daytime_only
+    Skovlunde St.: weekday_daytime_only
+    Malmparken St.: weekday_daytime_only
+    Ballerup St.: weekday_daytime_only
+

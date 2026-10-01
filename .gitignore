@@ -1,0 +1,6 @@
+.venv
+.DS_Store
+config/db.yml
+CLAUDE.md
+__pycache__/
+data/

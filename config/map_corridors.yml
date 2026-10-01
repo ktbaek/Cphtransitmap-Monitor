@@ -1,0 +1,520 @@
+# Map lines encoded as canonical corridors: maximum length, all stops, in order.
+# Stop names must match rail_stops.stop_name exactly (metro stations end in "(Metro)"), runs of whitespace tolerated.
+# Triplets are only checked against corridors of their own group or route (if stated).
+
+groups:
+  metro:    {agencies: ['319']}
+  stog:     {agencies: ['318']}
+  dsb:      {agencies: ['203', '471', '401', '451']}
+  lokaltog: {agencies: ['316']}
+  letbane:  {agencies: ['481']}
+
+corridors:
+  M1:
+    group: metro
+    routes: [M1]
+    stops:
+      - Vanløse St. (Metro)
+      - Flintholm St. (Metro)
+      - Lindevang St. (Metro)
+      - Fasanvej St. (Metro)
+      - Frederiksberg St. (Metro)
+      - Forum St. (Metro)
+      - Nørreport St. (Metro)
+      - Kongens Nytorv St. (Metro)
+      - Christianshavn St. (Metro)
+      - Islands Brygge St. (Metro)
+      - DR Byen St. (Metro)
+      - Sundby St. (Metro)
+      - Bella Center St. (Metro)
+      - Ørestad St. (Metro)
+      - Vestamager St. (Metro)
+
+  M2:
+    group: metro
+    routes: [M2]
+    stops:
+      - Vanløse St. (Metro)
+      - Flintholm St. (Metro)
+      - Lindevang St. (Metro)
+      - Fasanvej St. (Metro)
+      - Frederiksberg St. (Metro)
+      - Forum St. (Metro)
+      - Nørreport St. (Metro)
+      - Kongens Nytorv St. (Metro)
+      - Christianshavn St. (Metro)
+      - Amagerbro St. (Metro)
+      - Lergravsparken St. (Metro)
+      - Øresund St. (Metro)
+      - Amager Strand St. (Metro)
+      - Femøren St. (Metro)
+      - Kastrup St. (Metro)
+      - Københavns Lufthavn St. (Metro)
+
+  M3:
+    group: metro
+    routes: [M3]
+    ring: true
+    stops:
+      - København H (Metro)
+      - Enghave Plads St. (Metro)
+      - Frederiksberg Allé St. (Metro)
+      - Frederiksberg St. (Metro)
+      - Aksel Møllers Have St. (Metro)
+      - Nuuks Plads St. (Metro)
+      - Nørrebros Runddel St. (Metro)
+      - Nørrebro St. (Metro)
+      - Skjolds Plads St. (Metro)
+      - Vibenshus Runddel St. (Metro)
+      - Poul Henningsens Plads St. (Metro)
+      - Trianglen St. (Metro)
+      - Østerport St. (Metro)
+      - Marmorkirken St. (Metro)
+      - Kongens Nytorv St. (Metro)
+      - Gammel Strand St. (Metro)
+      - Rådhuspladsen St. (Metro)
+
+  M4:
+    group: metro
+    routes: [M4]
+    stops:
+      - Orientkaj St. (Metro)
+      - Nordhavn St. (Metro)
+      - Østerport St. (Metro)
+      - Marmorkirken St. (Metro)
+      - Kongens Nytorv St. (Metro)
+      - Gammel Strand St. (Metro)
+      - Rådhuspladsen St. (Metro)
+      - København H (Metro)
+      - Havneholmen St. (Metro)
+      - Enghave Brygge St. (Metro)
+      - Sluseholmen St. (Metro)
+      - Mozarts Plads St. (Metro)
+      - København Syd St. (Metro)
+  
+  A:
+    group: stog
+    routes: [A]
+    stops:
+      - Hillerød St. 
+      - Favrholm St. 
+      - Allerød St. 
+      - Birkerød St. 
+      - Holte St.
+      - Virum St. 
+      - Sorgenfri St.
+      - Lyngby St.
+      - Jægersborg St. 
+      - Gentofte St.
+      - Bernstorffsvej St. 
+      - Hellerup St.
+      - Svanemøllen St.
+      - Nordhavn St.
+      - Østerport St.
+      - Nørreport St. 
+      - Vesterport St.
+      - København H
+      - Dybbølsbro St.
+      - Sydhavn St.
+      - Sjælør St.
+      - København Syd St.
+      - Åmarken St.
+      - Friheden St.
+      - Avedøre St.
+      - Brøndby Strand St.
+      - Vallensbæk St.
+      - Ishøj St.
+      - Hundige St.
+      - Greve St.
+      - Karlslunde St.
+      - Solrød Strand St.
+      - Jersie St.
+      - Køge Nord St.
+      - Ølby St.
+      - Køge St.
+
+  E:
+    group: stog
+    routes: [E]
+    stops:
+      - Holte St.
+      - Virum St. 
+      - Sorgenfri St.
+      - Lyngby St.
+      - Jægersborg St. 
+      - Gentofte St.
+      - Bernstorffsvej St. 
+      - Hellerup St.
+      - Svanemøllen St.
+      - Nordhavn St.
+      - Østerport St.
+      - Nørreport St. 
+      - Vesterport St.
+      - København H
+      - Dybbølsbro St.
+      - Sydhavn St.
+      - København Syd St.
+      - Vallensbæk St.
+      - Ishøj St.
+      - Hundige St.
+      - Greve St.
+      - Karlslunde St.
+      - Solrød Strand St.
+      - Jersie St.
+      - Køge Nord St.
+      - Ølby St.
+      - Køge St.
+
+  B:
+    group: stog
+    routes: [B]
+    stops:
+      - Farum St.
+      - Værløse St.
+      - Hareskov St.
+      - Skovbrynet St.
+      - Bagsværd St.
+      - Stengården St.
+      - Buddinge St.
+      - Kildebakke St.
+      - Vangede St.
+      - Dyssegård St.
+      - Emdrup St.
+      - Ryparken St.
+      - Svanemøllen St.
+      - Nordhavn St.
+      - Østerport St.
+      - Nørreport St. 
+      - Vesterport St.
+      - København H
+      - Dybbølsbro St.
+      - Carlsberg St.
+      - Valby St.
+      - Danshøj St.
+      - Hvidovre St.
+      - Rødovre St.
+      - Brøndbyøster St.
+      - Glostrup St.
+      - Albertslund St.
+      - Taastrup St.
+      - Høje Taastrup St.
+
+  Bx:
+    group: stog
+    routes: [Bx]
+    stops:
+      - Buddinge St.
+      - Kildebakke St.
+      - Vangede St.
+      - Dyssegård St.
+      - Emdrup St.
+      - Ryparken St.
+      - Svanemøllen St.
+      - Nordhavn St.
+      - Østerport St.
+      - Nørreport St. 
+      - Vesterport St.
+      - København H
+      - Dybbølsbro St.
+      - Carlsberg St.
+      - Valby St.
+      - Danshøj St.
+      - Glostrup St.
+      - Albertslund St.
+      - Taastrup St.
+      - Høje Taastrup St.
+
+  C:
+    group: stog
+    routes: [C]
+    stops:
+      - Klampenborg St.
+      - Ordrup St.
+      - Charlottenlund St.
+      - Hellerup St.
+      - Svanemøllen St.
+      - Nordhavn St.
+      - Østerport St.
+      - Nørreport St. 
+      - Vesterport St.
+      - København H
+      - Dybbølsbro St.
+      - Carlsberg St.
+      - Valby St.
+      - Langgade St.
+      - Peter Bangs Vej St.
+      - Flintholm St.
+      - Vanløse St.
+      - Jyllingevej St.
+      - Islev St.
+      - Husum St.
+      - Herlev St.
+      - Skovlunde St.
+      - Malmparken St.
+      - Ballerup St.
+      - Måløv St.
+      - Kildedal St.
+      - Veksø St.
+      - Stenløse St.
+      - Egedal St.
+      - Ølstykke St.
+      - Vinge St.
+      - Frederikssund St.
+
+  H:
+    group: stog
+    routes: [H]
+    stops:
+      - Østerport St.
+      - Nørreport St. 
+      - Vesterport St.
+      - København H
+      - Dybbølsbro St.
+      - Carlsberg St.
+      - Valby St.
+      - Langgade St.
+      - Peter Bangs Vej St.
+      - Flintholm St.
+      - Vanløse St.
+      - Jyllingevej St.
+      - Islev St.
+      - Husum St.
+      - Herlev St.
+      - Skovlunde St.
+      - Malmparken St.
+      - Ballerup St.
+
+  F:
+    group: stog
+    routes: [F]
+    stops:
+      - Hellerup St.
+      - Ryparken St.
+      - Bispebjerg St.
+      - Nørrebro St.
+      - Fuglebakken St.
+      - Grøndal St. 
+      - Flintholm St.
+      - KB Hallen St.
+      - Ålholm St.
+      - Danshøj St. 
+      - Vigerslev Alle St.
+      - København Syd St. 
+
+  Kystbanen:
+    group: dsb
+    stops: 
+      - Helsingør St. 
+      - Snekkersten St.
+      - Espergærde St.
+      - Humlebæk St.
+      - Nivå St.
+      - Kokkedal St.
+      - Rungsted Kyst St.
+      - Vedbæk St.
+      - Skodsborg St.
+      - Klampenborg St.
+      - Hellerup St.
+      - Østerport St.
+      - Nørreport St.
+      - København H
+
+  Øresundsbanen:
+    group: dsb
+    stops: 
+      - Østerport St.
+      - Nørreport St.
+      - København H
+      - Ørestad St.
+      - Tårnby St.
+      - CPH Lufthavn
+
+  København-Syd-korridor:
+    group: dsb
+    stops: 
+      - Roskilde St.
+      - Trekroner St.
+      - Hedehusene St.
+      - Høje Taastrup St.
+      - København Syd St.
+      - Ørestad St.
+      - Tårnby St.
+      - CPH Lufthavn
+
+  Næstvedbanen:
+    group: dsb
+    stops: 
+      - Østerport St.
+      - Nørreport St.
+      - København H
+      - København Syd St.
+      - Køge Nord St.
+      - Ølby St.
+      - Køge St.
+
+  Ringstedbanen:
+    group: dsb
+    stops: 
+      - Østerport St.
+      - Nørreport St.
+      - København H
+      - København Syd St.
+      - Køge Nord St.
+      - Ringsted St.
+
+  Vestbanen:
+    group: dsb
+    stops: 
+      - Østerport St.
+      - Nørreport St.
+      - København H
+      - Valby St.
+      - Høje Taastrup St.
+      - Hedehusene St.
+      - Trekroner St.
+      - Roskilde St.
+      - Viby Sjælland St.
+      - Borup St.
+      - Ringsted St.
+  
+  Frederiksværkbanen:
+    group: lokaltog
+    stops:
+      - Hundested Havn St. 
+      - Hundested St.
+      - Vibehus St.
+      - Østerbjerg St.
+      - Dyssekilde St.
+      - Melby St.
+      - Hanehoved St.
+      - Frederiksværk St.
+      - Lille Kregme St.
+      - Kregme St.
+      - Ølsted St. 
+      - Grimstrup St.
+      - Skævinge St.
+      - Gørløse St.
+      - Brødeskov St.
+      - Favrholm St.
+      - Hillerød St.
+
+  Gribskovbanen:
+    group: lokaltog
+    stops:
+      - Gilleleje St.
+      - Fjellenstrup St.
+      - Pårup St.
+      - Græsted St.
+      - Græsted Syd St.
+      - Saltrup St.
+      - Mårum (Græsted-Gilleleje) St.
+      - Kagerup St. (Hillerød)
+      - Gribsø St.
+      - Slotspavillonen St.
+      - Hillerød St.
+  
+  Tisvildelejebanen:
+    group: lokaltog
+    stops:
+      - Tisvildeleje St.
+      - Godhavn St.
+      - Holløse St.
+      - Vejby St.
+      - Ørby St.
+      - Troldebakkerne St. 
+      - Helsinge St.
+      - Duemose St.
+      - Kagerup St. (Hillerød)
+      - Gribsø St.
+      - Slotspavillonen St.
+      - Hillerød St.
+
+  Hornbækbanen:
+    group: lokaltog
+    stops: 
+      - Gilleleje St.
+      - Gilleleje Øst St.
+      - Stæremosen St.
+      - Søborg St. (Gilleleje)
+      - Firhøj St. (Gilleleje)
+      - Dronningmølle St.
+      - Kildekrog St.
+      - Horneby Sand St.
+      - Hornbæk St.
+      - Karinebæk St. 
+      - Saunte St.
+      - Skibstrup St.
+      - Ålsgårde St.
+      - Hellebæk St.
+      - Højstrup St.
+      - Marienlyst St.
+      - Grønnehave St. (Helsingør)
+      - Helsingør St.
+
+  Lille-Nord:
+    group: lokaltog
+    stops: 
+      - Hillerød St.
+      - Grønholt St.
+      - Kratbjerg St.
+      - Fredensborg St.
+      - Langerød St. 
+      - Kvistgård St.
+      - Mørdrup St.
+      - Snekkersten St.
+      - Helsingør St.
+
+  Nærumbanen:
+    group: lokaltog
+    stops:
+      - Jægersborg St. 
+      - Nørgaardsvej St.
+      - Lyngby Lokal St.
+      - Fuglevad St.
+      - Brede St.
+      - Ørholm St.
+      - Ravnholm St.
+      - Nærum St.
+
+  Østbanen:
+    group: lokaltog
+    stops:
+      - Roskilde St.
+      - Gadstrup St.
+      - Havdrup St.
+      - Lille Skensved St.
+      - Ølby St.
+      - Køge St.
+
+  Letbanen:
+    group: letbane
+    stops:
+      - Lundtofte St. (Letbane)
+      - Rævehøjvej (Letbane)
+      - Anker Engelundsvej - DTU (Letbane)
+      - Akademivej - DTU (Letbane)
+      - Fortunbyen (Letbane)
+      - Lyngby Centrum (Letbane)
+      - Lyngby St. (Letbane)
+      - Gammelmosevej (Letbane)
+      - Buddinge St. (Letbane)
+      - Gladsaxe Rådhus (Letbane)
+      - Gladsaxevej (Letbane)
+      - Gladsaxe Trafikplads (Letbane)
+      - Dynamovej (Letbane)
+      - Herlev Hospital (Letbane)
+      - Herlev Bymidte (Letbane)
+      - Herlev St. (Letbane)
+      - Herlev Syd (Letbane)
+      - Rødovre Nord (Letbane)
+      - Glostrup Ejby (Letbane)
+      - Glostrup Nord - Hersted (Letbane)
+      - Glostrup Hospital - Rigshospitalet (Letbane)
+      - Glostrup St. (Letbane)
+      - Kirkebjerg (Letbane)
+      - Brøndbyvester (Letbane)
+      - Delta Park (Letbane)
+      - Vallensbæk St. (Letbane)
+      - Strandhaven (Letbane)
+      - Ishøj Strand - ARKEN (Letbane)
+      - Ishøj St. (Letbane)
