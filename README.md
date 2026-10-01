@@ -1,6 +1,6 @@
 # Copenhagen rail network monitoring from Rejseplanen GTFS
 
-This project detects changes to the Copenhagen-area rail network using a GTFS static feed from [Rejseplanen Labs](https://labs.rejseplanen.dk/). The goal is to maintain and update the customer-facing map [Copenhagen Transit Map](https://cphtransitmap.dk/en), where S-train and metro are shown as individual lines with service patterns, and regional/national rail is shown as one simplified line with no service patterns. The tools detect new/closed stations, changed routing, and changes in service pattern.
+This project detects changes to the Copenhagen-area rail network using a GTFS static feed from [Rejseplanen Labs](https://labs.rejseplanen.dk/). The goal is to maintain and update the customer-facing map [Copenhagen Transit Map](https://cphtransitmap.dk/en). The tools detect new/closed stations, changed routing, and changes in service pattern.
 
 ## Data
 Access to the data requires authorization from Rejseplanen Labs.
@@ -14,7 +14,7 @@ Python + PostgreSQL. Connection settings in `config/db.yml` (block `default`; pa
   (`stop_sequence::int`, `route_type::int`, `stop_lat::float`). Ordering by `stop_sequence`
   without the cast sorts lexicographically and scrambles patterns with 10+ stops (already fixed in `derive_route_patterns.py`).
 - **Filtering stages**. Each step in the pipeline narrows the data a
-  bit further, so it's worth knowing which question each stage answers:
+  bit further:
   1. The raw tables hold every row from the feed as-is — bus, ferry, and long-distance rail outside
      the area are all still there.
   2. The `rail_*` views (`create_views.py`) narrow to rail route types only (`RAIL_ROUTE_TYPES`
@@ -43,7 +43,7 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
 - `create_views.py --schema ...`: creates/replaces the rail views (depend only on raw tables).
 - `derive_route_patterns.py --schema ...`: table `route_patterns`, one row per distinct ordered
   stop sequence per route/direction/headsign (`pattern_id`, `stop_ids`, `stop_names`,
-  `stop_in_cph_area`, `n_trips`, `trip_ids`). Keeps only patterns touching the area.
+  `stop_in_cph_area`, `n_trips`, `trip_ids`). Keeps only patterns touching the Copenhagen area.
 - `derive_service_pattern.py --schema ...`: presence table `stop_service_pattern`
   (`route_id, stop_id, day_type, time_band`). Weekday bands are set by constants at the top of the
   script; Saturday and Sunday/holiday are not split by time of day. Also creates view
@@ -55,7 +55,7 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   at X do not imply A-X-B).
 
 ### Visualization helpers
-These scripts generate GeoJSON files of the shapes in the GTFS data, for a visual overview — they
+These scripts generate GeoJSON files of the shapes in the GTFS data, for a visual overview. They
 are not required for any analysis.
 - `export_geojson.py`: shapes + stops per agency, with far-away geometry grouped onto
   `config/destination_*.geojson` points to keep files readable.
@@ -71,7 +71,7 @@ need to be kept up to date by hand whenever the map changes.
 - `check_map_corridors.py --schema ... [--corridors ...]`: print-only. Checks `route_stop_triplets`
   against map lines encoded in `config/map_corridors.yml` (per group of agencies, stops by
   `stop_name`, optional `ring: true`, optional `routes:` list of route_short_names). A triplet is
-  consistent if one corridor in scope holds its non-NULL stops in order, either direction; NULL and
+  consistent if one corridor on the map holds its non-NULL stops in order, either direction; NULL and
   out-of-area neighbours are wildcards. Scope is the route's own corridors if the route is listed
   (catches extensions along another line's corridor), otherwise all corridors of its group.
   Reports unknown stops, conflicts, and corridor stops not served by the corridor's routes.
@@ -83,9 +83,7 @@ need to be kept up to date by hand whenever the map changes.
   (every stop a route serves is assumed `default: all_times` unless listed). Every route of every
   `agencies:` entry is checked (S-tog/Metro), whether or not it's mentioned under `routes:` — so an
   unlisted route with a real deviation isn't silently skipped. Reports category mismatches and map
-  exceptions for stops the route doesn't serve. `config/map_service_patterns.yml` currently has
-  real exceptions encoded for S-tog routes A, Bx, C, E, H; B, F and all four Metro lines match
-  `default: all_times` with no exceptions needed.
+  exceptions for stops the route doesn't serve.
 
 ## Run order
 1. `load_gtfs.py`
@@ -95,8 +93,8 @@ need to be kept up to date by hand whenever the map changes.
 
 ## Suggested maintenance analyses
 - Run `check_map_corridors.py` and `check_map_service_patterns.py` against a new snapshot and
-  review the two YAML files for drift against the map.
-- Diffing between snapshots is not implemented yet. Plan: plain `EXCEPT` queries for triplet
+  review the two YAML files for conflicts.
+- Diffing between snapshots can be implemented by plain `EXCEPT` queries for triplet
   presence/absence. Whether `stop_id`/`route_id` stay stable between exports is unverified
   (`trip_id`/`service_id` almost certainly are not). Diffing `stop_service_pattern` on
   (route_short_name, stop name) would catch line extensions/truncations between snapshots.
@@ -104,8 +102,3 @@ need to be kept up to date by hand whenever the map changes.
   nothing reads it yet. Could be used to check rail-to-rail interchanges against the map's drawn
   connections (e.g. Nørreport St. ↔ Nørreport St. (Metro)).
 - Other diffing/exploratory SQL queries to aid understanding of the network.
-
-## Gotchas
-- DBeaver's array cell viewer can show array elements out of order; the stored order is correct.
-  Use `unnest(...) WITH ORDINALITY ... ORDER BY ord` to inspect.
-- `array_position`/`@>` on `stop_names` tests membership, not adjacency.
