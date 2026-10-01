@@ -6,14 +6,14 @@ This project detects changes to the Copenhagen-area rail network using a GTFS st
 Access to the data requires authorization from Rejseplanen Labs.
 
 ## Stack and layout
-Python + PostgreSQL. Connection settings in `config/db.yml` (block `default`; password optional, falls back to `PGPASSWORD`). Area polygons in `config/` as geojson files. No PostGIS is used, so point-in-polygon analyses must be done in Python using shapely.
+Python + PostgreSQL. Connection settings in `config/db.yml` (block `default`; password optional, falls back to `PGPASSWORD`). Area polygons in `config/` as geojson files. No PostGIS is used, so point-in-polygon analyses are done in Python using `shapely`.
 
 ## Design decisions
 - **One Postgres schema per snapshot**, named `gtfs_YYYYMMDD`. Diffing = cross-schema SQL.
 - **Raw `COPY` load, every column stored as `text`.** Cast explicitly when needed
   (`stop_sequence::int`, `route_type::int`, `stop_lat::float`). Ordering by `stop_sequence`
   without the cast sorts lexicographically and scrambles patterns with 10+ stops (already fixed in `derive_route_patterns.py`).
-- **Filtering stages** — each step in the pipeline narrows the data a
+- **Filtering stages**. Each step in the pipeline narrows the data a
   bit further, so it's worth knowing which question each stage answers:
   1. The raw tables hold every row from the feed as-is — bus, ferry, and long-distance rail outside
      the area are all still there.
@@ -25,7 +25,7 @@ Python + PostgreSQL. Connection settings in `config/db.yml` (block `default`; pa
   4. The derived tables (`route_patterns`, `stop_service_pattern`, `route_stop_triplets`) apply the
      real content filters: pass-through stops and exception-only services are dropped, and only
      patterns that touch the Copenhagen area are kept at all.
-- **Copenhagen area** = shapely point-in-polygon on stop coordinates, written to a boolean
+- **Copenhagen area** = `shapely` point-in-polygon on stop coordinates, written to a boolean
   column `stops.in_cph_area`. No hand-maintained station/agency lists, so new stations classify
   themselves.
 - Excluded wherever it matters (stage 4 above): pass-through stops (`pickup_type` and
