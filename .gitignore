@@ -3,4 +3,4 @@
 config/db.yml
 CLAUDE.md
 __pycache__/
-data/
+data/GTFS*
