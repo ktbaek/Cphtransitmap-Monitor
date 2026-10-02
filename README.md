@@ -38,9 +38,8 @@ Python + PostgreSQL. Connection settings in `config/db.yml` (block `default`; pa
 These scripts load the relevant GTFS files into PostgreSQL tables and derive route patterns, service patterns, and stop triplets.
 
 - `gtfs_common.py`: shared DB connection helpers (`--dsn`, `--config`, `--config-env`).
-- `load_gtfs.py --gtfs-dir ... --snapshot-date YYYY-MM-DD [--polygon ...] [--force]`: loads raw
-  tables, adds `in_cph_area`. Refuses to overwrite an existing schema without `--force` (which
-  drops the schema first).
+- `load_gtfs.py`: loads raw tables, adds `in_cph_area`. Refuses to overwrite an existing schema
+  without `--force` (which drops the schema first).
 
   | Option | Default | Description |
   | :--- | :--- | :--- |
@@ -49,13 +48,13 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   | `--polygon` | `config/cph_area.geojson` | Path to Copenhagen area polygon |
   | `--force` | *(flag)* | Overwrite the snapshot's schema if it already exists. Without this flag, the script refuses to run again for a date that's already been loaded. |
 
-- `create_views.py --schema ...`: creates/replaces the rail views (depend only on raw tables).
+- `create_views.py`: creates/replaces the rail views (depend only on raw tables).
 
   | Option | Default | Description |
   | :--- | :--- | :--- |
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
 
-- `derive_route_patterns.py --schema ...`: table `route_patterns`, one row per distinct ordered
+- `derive_route_patterns.py`: table `route_patterns`, one row per distinct ordered
   stop sequence per route/direction/headsign (`pattern_id`, `stop_ids`, `stop_names`,
   `stop_in_cph_area`, `n_trips`, `trip_ids`). Keeps only patterns touching the Copenhagen area.
 
@@ -63,7 +62,7 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   | :--- | :--- | :--- |
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
 
-- `derive_service_pattern.py --schema ...`: presence table `stop_service_pattern`
+- `derive_service_pattern.py`: presence table `stop_service_pattern`
   (`route_id, stop_id, day_type, time_band`). Weekday bands are set by constants at the top of the
   script; Saturday and Sunday/holiday are not split by time of day. Also creates view
   `service_pattern`, collapsing that into one named `service_category` per (route_id, stop_id)
@@ -73,7 +72,7 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   | :--- | :--- | :--- |
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
 
-- `derive_stop_triplets.py --schema ...`: table `route_stop_triplets` (prev, stop, next), one row
+- `derive_stop_triplets.py`: table `route_stop_triplets` (prev, stop, next), one row
   per (pattern, position), route_id-attributed. Triplets are used rather than pairwise edges
   because they preserve which through-movements exist at junctions (lines A-X-C and B-X-D meeting
   at X do not imply A-X-B).
@@ -114,7 +113,7 @@ These scripts check whether the topology and service patterns shown on the map a
 with the GTFS data. `config/map_corridors.yml` and `config/map_service_patterns.yml` are a manual
 encoding of what's currently drawn on the map — they are not generated from the GTFS data, and
 need to be kept up to date by hand whenever the map changes.
-- `check_map_corridors.py --schema ... [--corridors ...]`: print-only. Checks `route_stop_triplets`
+- `check_map_corridors.py`: print-only. Checks `route_stop_triplets`
   against map lines encoded in `config/map_corridors.yml` (per group of agencies, stops by
   `stop_name`, optional `ring: true`, optional `routes:` list of route_short_names). A triplet is
   consistent if one corridor on the map holds its non-NULL stops in order, either direction; NULL and
@@ -130,7 +129,7 @@ need to be kept up to date by hand whenever the map changes.
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
   | `--corridors` | `config/map_corridors.yml` | Path to the corridor definitions |
 
-- `check_map_service_patterns.py --schema ... [--patterns ...]`: print-only. Checks view
+- `check_map_service_patterns.py`: print-only. Checks view
   `service_pattern` against `config/map_service_patterns.yml`, a sparse per-route exception list
   (every stop a route serves is assumed `default: all_times` unless listed). Every route of every
   `agencies:` entry is checked (S-tog/Metro), whether or not it's mentioned under `routes:` — so an
