@@ -29,7 +29,7 @@ check_map_service_patterns.py and manual inspection.
 
 Only stops with stops.in_cph_area = true are included — a stop entirely
 outside the area of interest (on a fully-external DSB regional/IC line,
-mainly) is left out, same restriction as route_patterns.
+mainly) is left out, same restriction as trip_patterns.
 
 Usage:
     python derive_service_pattern.py --schema gtfs_20260921

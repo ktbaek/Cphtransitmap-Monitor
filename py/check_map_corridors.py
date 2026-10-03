@@ -21,7 +21,7 @@ Reports, per group: unknown stops (served, but on no corridor in scope),
 conflicts (all stops known, but no corridor in scope orders them) and unserved
 corridor stops (on the map, but not served by the corridor's routes, or by the
 group if it lists none). Groups without corridors are skipped. Print-only;
-requires route_stop_triplets (derive_stop_triplets.py).
+requires stop_triplets (derive_stop_triplets.py).
 
 Usage:
     python check_map_corridors.py --schema gtfs_20260921
@@ -125,7 +125,7 @@ def fetch_triplets(conn, schema: str):
         cur.execute(f'''
             SELECT r.agency_id, t.route_short_name, t.prev_stop_id, t.stop_id, t.next_stop_id,
                    sum(t.n_trips)
-            FROM "{schema}".route_stop_triplets t
+            FROM "{schema}".stop_triplets t
             JOIN "{schema}".routes r USING (route_id)
             GROUP BY 1, 2, 3, 4, 5
         ''')

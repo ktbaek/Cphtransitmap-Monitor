@@ -2,22 +2,22 @@
 """
 derive_stop_triplets.py
 
-Builds (prev_stop, stop, next_stop) triplets from route_patterns — a plain
+Builds (prev_stop, stop, next_stop) triplets from trip_patterns — a plain
 A-B edge can't tell you which through-combinations actually exist at a
 junction where multiple lines cross (e.g. lines A-X-C and B-X-D meet at X,
 but A-X-B, B-X-C, C-X-D, D-X-A don't exist even though the track layout
 could support them). A triplet disambiguates this by keeping one stop of
 context on each side.
 
-Requires "{schema}".route_patterns to already exist (run
-derive_route_patterns.py first) — triplets are built from it, so they
+Requires "{schema}".trip_patterns to already exist (run
+derive_trip_patterns.py first) — triplets are built from it, so they
 inherit every filter already baked into that table: area restriction,
 pass-through-stop exclusion, and the calendar-based exclusion of
 exception-only services.
 
 Creates one table:
 
-  route_stop_triplets — one row per (pattern, position), keeping
+  stop_triplets — one row per (pattern, position), keeping
       route_id/direction_id/pattern_id so you can attribute a given
       transition to a specific route. The first stop of a pattern has
       prev_stop_id = NULL, the last has next_stop_id = NULL — these NULLs
@@ -36,9 +36,9 @@ from gtfs_common import add_connection_args, connect_from_args
 
 def derive_stop_triplets(conn, schema: str):
     with conn.cursor() as cur:
-        cur.execute(f'DROP TABLE IF EXISTS "{schema}".route_stop_triplets')
+        cur.execute(f'DROP TABLE IF EXISTS "{schema}".stop_triplets')
         cur.execute(f'''
-            CREATE TABLE "{schema}".route_stop_triplets AS
+            CREATE TABLE "{schema}".stop_triplets AS
             WITH pattern_stops AS (
                 SELECT
                     rp.pattern_id,
@@ -48,7 +48,7 @@ def derive_stop_triplets(conn, schema: str):
                     rp.n_trips,
                     u.stop_id,
                     u.ord
-                FROM "{schema}".route_patterns rp,
+                FROM "{schema}".trip_patterns rp,
                      unnest(rp.stop_ids) WITH ORDINALITY AS u(stop_id, ord)
             )
             SELECT
@@ -70,10 +70,10 @@ def derive_stop_triplets(conn, schema: str):
     conn.commit()
 
     with conn.cursor() as cur:
-        cur.execute(f'SELECT count(*) FROM "{schema}".route_stop_triplets')
-        n_route_triplets = cur.fetchone()[0]
+        cur.execute(f'SELECT count(*) FROM "{schema}".stop_triplets')
+        n_triplets = cur.fetchone()[0]
 
-    print(f'"{schema}": {n_route_triplets} route_stop_triplets rows.')
+    print(f'"{schema}": {n_triplets} stop_triplets rows.')
 
 
 def main():

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-derive_route_patterns.py
+derive_trip_patterns.py
 
 Compute one row per distinct stop-sequence ("pattern") for every
-route/direction in a loaded GTFS snapshot schema.
+route/direction in a loaded GTFS snapshot schema — a trip pattern is
+composed of all trips that are identical with regard to their stop
+sequence.
 
-Creates/replaces "{schema}".route_patterns with columns:
+Creates/replaces "{schema}".trip_patterns with columns:
     pattern_id, route_id, route_short_name, direction_id,
     first_stop, last_stop, stop_ids, stop_names, stop_in_cph_area
     (arrays, in visiting order), n_trips, trip_ids (which trips run this
@@ -50,7 +52,7 @@ A route/direction with more than one row here has more than one distinct
 stop sequence in service (branches, short-turns, etc.) — worth a look.
 
 Usage:
-    python derive_route_patterns.py --schema gtfs_20260921
+    python derive_trip_patterns.py --schema gtfs_20260921
 """
 
 import argparse
@@ -58,11 +60,11 @@ import argparse
 from gtfs_common import add_connection_args, connect_from_args
 
 
-def derive_route_patterns(conn, schema: str):
+def derive_trip_patterns(conn, schema: str):
     with conn.cursor() as cur:
-        cur.execute(f'DROP TABLE IF EXISTS "{schema}".route_patterns')
+        cur.execute(f'DROP TABLE IF EXISTS "{schema}".trip_patterns')
         cur.execute(f'''
-            CREATE TABLE "{schema}".route_patterns AS
+            CREATE TABLE "{schema}".trip_patterns AS
             WITH trip_seqs AS (
                 SELECT
                     t.trip_id,
@@ -114,7 +116,7 @@ def derive_route_patterns(conn, schema: str):
     with conn.cursor() as cur:
         cur.execute(f'''
             SELECT route_short_name, direction_id, count(*) AS n_patterns, sum(n_trips) AS n_trips
-            FROM "{schema}".route_patterns
+            FROM "{schema}".trip_patterns
             GROUP BY route_short_name, direction_id
             ORDER BY route_short_name, direction_id
         ''')
@@ -132,7 +134,7 @@ def main():
     args = parser.parse_args()
 
     conn = connect_from_args(args)
-    derive_route_patterns(conn, args.schema)
+    derive_trip_patterns(conn, args.schema)
     conn.close()
 
 

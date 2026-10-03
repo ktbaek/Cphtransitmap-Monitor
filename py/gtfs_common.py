@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Shared connection helpers for the GTFS monitoring scripts (load_gtfs.py,
-derive_route_patterns.py, derive_service_pattern.py, and eventually
+derive_trip_patterns.py, derive_service_pattern.py, and eventually
 compare_gtfs.py). Reads the same config/db.yml format used elsewhere."""
 
 import os
