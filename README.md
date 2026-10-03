@@ -227,7 +227,7 @@ entirely via `--dsn`.
 ## Config files
 `config/map_corridors.yml` and `config/map_service_patterns.yml` are manual encodings of what's currently drawn on the map. They are not generated from the GTFS data, and they are the only record of what the map currently draws, so edit them whenever the map changes.
  
-**`map_corridors.yml`** currently encodes the whole rail network: Metro (M1-M4), all S-tog lines, the DSB regional corridors (Kystbanen, Øresundsbanen, Vestbanen, and others), every Lokaltog line, and Letbanen. Stop names must match `rail_stops.stop_name` exactly. Excerpt:
+**`map_corridors.yml`** currently encodes the whole rail network: Metro (M1-M4), all S-tog lines, the DSB regional corridors (Kystbanen, Øresundsbanen, Vestbanen, and others), every Lokaltog line, and Letbanen. Stop names must match `rail_stops.stop_name` exactly, although runs of whitespace in either the YAML file or the GTFS feed are tolerated. Excerpt:
  
 ```yaml
 groups:
