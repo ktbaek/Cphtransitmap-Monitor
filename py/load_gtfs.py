@@ -3,9 +3,7 @@
 load_gtfs.py
 
 Load a raw Rejseplanen GTFS snapshot into its own PostgreSQL schema
-(one schema per fetch, e.g. gtfs_20260921), using native COPY — no
-type-guessing, no pandas. Rail-filtering happens afterwards via SQL
-views, not in Python.
+(one schema per fetch, e.g. gtfs_20260921), using native COPY. 
 
 Usage:
     python load_gtfs.py --gtfs-dir /path/to/unzipped_gtfs --snapshot-date 2026-09-21

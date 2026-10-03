@@ -3,23 +3,27 @@
 derive_route_patterns.py
 
 Compute one row per distinct stop-sequence ("pattern") for every
-route/direction in a loaded GTFS snapshot schema — the same two-step
-aggregation (per-trip ordered array, then group trips by identical array)
-used for the manual M4 check, generalized to the whole network.
+route/direction in a loaded GTFS snapshot schema.
 
 Creates/replaces "{schema}".route_patterns with columns:
-    pattern_id, route_id, route_short_name, direction_id, trip_headsign,
-    stop_ids, stop_names, stop_in_cph_area (arrays, in visiting order),
-    n_trips, trip_ids (which trips run this exact pattern)
+    pattern_id, route_id, route_short_name, direction_id,
+    first_stop, last_stop, stop_ids, stop_names, stop_in_cph_area
+    (arrays, in visiting order), n_trips, trip_ids (which trips run this
+    exact pattern)
 
 pattern_id is a stable-within-this-table row identifier (not stable across
 snapshots) — used by derive_stop_triplets.py to join stops within one
 pattern's array without drifting into a different pattern of the same
 route/direction.
 
-trip_headsign is included in the grouping, so two trips with an identical
-stop sequence but a different headsign (e.g. distinct branch names shown
-to passengers) now count as separate patterns rather than being merged.
+first_stop/last_stop are just stop_names[1]/stop_names[-1], kept as their
+own columns so a pattern's rough extent is visible without expanding
+stop_names.
+
+trip_headsign is NOT part of the grouping — two trips with an identical
+stop sequence count as the same pattern regardless of headsign (distinct
+branch names shown to passengers, say), since the stop sequence is what
+this table is keyed on.
 
 Trips whose service_id has an all-zero weekly calendar (no day of the week
 set) are excluded — these are typically services defined purely through
@@ -65,7 +69,6 @@ def derive_route_patterns(conn, schema: str):
                     t.route_id,
                     r.route_short_name,
                     t.direction_id,
-                    t.trip_headsign,
                     array_agg(st.stop_id ORDER BY st.stop_sequence::int) AS stop_ids,
                     array_agg(s.stop_name ORDER BY st.stop_sequence::int) AS stop_names,
                     array_agg(s.in_cph_area ORDER BY st.stop_sequence::int) AS stop_in_cph_area,
@@ -87,14 +90,15 @@ def derive_route_patterns(conn, schema: str):
                     COALESCE(NULLIF(st.pickup_type, ''), '0') = '1'
                     AND COALESCE(NULLIF(st.drop_off_type, ''), '0') = '1'
                 )
-                GROUP BY t.trip_id, t.route_id, r.route_short_name, t.direction_id, t.trip_headsign
+                GROUP BY t.trip_id, t.route_id, r.route_short_name, t.direction_id
             )
             SELECT
                 row_number() OVER (ORDER BY route_id, direction_id, stop_ids) AS pattern_id,
                 route_id,
                 route_short_name,
                 direction_id,
-                trip_headsign,
+                stop_names[1] AS first_stop,
+                stop_names[array_length(stop_names, 1)] AS last_stop,
                 stop_ids,
                 stop_names,
                 stop_in_cph_area,
@@ -102,7 +106,7 @@ def derive_route_patterns(conn, schema: str):
                 array_agg(trip_id ORDER BY trip_id) AS trip_ids
             FROM trip_seqs
             WHERE touches_cph_area
-            GROUP BY route_id, route_short_name, direction_id, trip_headsign,
+            GROUP BY route_id, route_short_name, direction_id,
                      stop_ids, stop_names, stop_in_cph_area
         ''')
     conn.commit()

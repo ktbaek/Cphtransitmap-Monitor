@@ -1,6 +1,6 @@
 # Copenhagen rail network monitoring from Rejseplanen GTFS
 
-This project detects changes to the Copenhagen-area rail network using a GTFS static feed from [Rejseplanen Labs](https://labs.rejseplanen.dk/). The goal is to maintain and update the customer-facing map [Copenhagen Transit Map](https://cphtransitmap.dk/en). The tools detect new/closed stations, changed routing, and changes in service pattern.
+This project detects changes to the Copenhagen-area rail network using a [GTFS](https://gtfs.org) static feed from [Rejseplanen Labs](https://labs.rejseplanen.dk/). The goal is to maintain and update the customer-facing map [Copenhagen Transit Map](https://cphtransitmap.dk/en). The project contains tools that detect new/closed stations, changed routing, and changes in service pattern.
 
 ## Data
 Access to the data requires authorization from Rejseplanen Labs.
@@ -35,11 +35,10 @@ Python + PostgreSQL. Connection settings in `config/db.yml` (block `default`; pa
 ## Scripts
 
 ### Loading and deriving
-These scripts load the relevant GTFS files into PostgreSQL tables and derive route patterns, service patterns, and stop triplets.
+These scripts load the relevant GTFS files into PostgreSQL tables and derive trip patterns, service patterns, and stop triplets.
 
-- `gtfs_common.py`: shared DB connection helpers (`--dsn`, `--config`, `--config-env`).
-- `load_gtfs.py`: loads raw tables, adds `in_cph_area`. Refuses to overwrite an existing schema
-  without `--force` (which drops the schema first).
+#### `gtfs_common.py`: shared DB connection helpers (`--dsn`, `--config`, `--config-env`).
+#### `load_gtfs.py`: loads raw tables, adds boolean value `in_cph_area` to `stops` table.
 
   | Option | Default | Description |
   | :--- | :--- | :--- |
@@ -48,13 +47,13 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   | `--polygon` | `config/cph_area.geojson` | Path to Copenhagen area polygon |
   | `--force` | *(flag)* | Overwrite the snapshot's schema if it already exists. Without this flag, the script refuses to run again for a date that's already been loaded. |
 
-- `create_views.py`: creates/replaces the rail views (depend only on raw tables).
+#### `create_views.py`: creates/replaces the rail views (depend only on raw tables).
 
   | Option | Default | Description |
   | :--- | :--- | :--- |
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
 
-- `derive_route_patterns.py`: table `route_patterns`, one row per distinct ordered
+#### `derive_route_patterns.py`: creates table `route_patterns`, one row per distinct ordered
   stop sequence per route/direction/headsign (`pattern_id`, `stop_ids`, `stop_names`,
   `stop_in_cph_area`, `n_trips`, `trip_ids`). Keeps only patterns touching the Copenhagen area.
 
@@ -62,7 +61,7 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   | :--- | :--- | :--- |
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
 
-- `derive_service_pattern.py`: presence table `stop_service_pattern`
+#### `derive_service_pattern.py`: creates presence table `stop_service_pattern`
   (`route_id, stop_id, day_type, time_band`). Weekday bands are set by constants at the top of the
   script; Saturday and Sunday/holiday are not split by time of day. Also creates view
   `service_pattern`, collapsing that into one named `service_category` per (route_id, stop_id)
@@ -72,10 +71,8 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
   | :--- | :--- | :--- |
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
 
-- `derive_stop_triplets.py`: table `route_stop_triplets` (prev, stop, next), one row
-  per (pattern, position), route_id-attributed. Triplets are used rather than pairwise edges
-  because they preserve which through-movements exist at junctions (lines A-X-C and B-X-D meeting
-  at X do not imply A-X-B).
+#### `derive_stop_triplets.py`: creates table `route_stop_triplets` (prev, stop, next), one row
+  per (pattern, position), route_id-attributed. 
 
   | Option | Default | Description |
   | :--- | :--- | :--- |
@@ -84,7 +81,7 @@ These scripts load the relevant GTFS files into PostgreSQL tables and derive rou
 ### Visualization helpers
 These scripts generate GeoJSON files of the shapes in the GTFS data, for a visual overview. They
 are not required for any analysis.
-- `export_geojson.py`: shapes + stops per agency, with far-away geometry grouped onto
+#### `export_geojson.py`: shapes + stops per agency, with far-away geometry grouped onto
   `config/destination_*.geojson` points to keep files readable.
 
   | Option | Default | Description |
@@ -98,7 +95,7 @@ are not required for any analysis.
   | `--no-group` | *(flag)* | Disable collapsing of out-of-area geometry onto destination points |
   | `--all-services` | *(flag)* | Use `rail_trips` (includes exception-only services) instead of `regular_rail_trips` |
 
-- `export_shape.py`: a single `shape_id`, no joins, for quick spot checks.
+#### `export_shape.py`: a single `shape_id`, no joins, for quick spot checks.
 
   | Option | Default | Description |
   | :--- | :--- | :--- |
@@ -110,10 +107,11 @@ See `output/` for example exports.
 
 ### Checking against the current map
 These scripts check whether the topology and service patterns shown on the map are consistent
-with the GTFS data. `config/map_corridors.yml` and `config/map_service_patterns.yml` are a manual
-encoding of what's currently drawn on the map — they are not generated from the GTFS data, and
+with the GTFS data. `config/map_corridors.yml` and `config/map_service_patterns.yml` are manual
+encodings of what's currently drawn on the map — they are not generated from the GTFS data, and
 need to be kept up to date by hand whenever the map changes.
-- `check_map_corridors.py`: print-only. Checks `route_stop_triplets`
+
+#### `check_map_corridors.py`: print-only. Checks `route_stop_triplets`
   against map lines encoded in `config/map_corridors.yml` (per group of agencies, stops by
   `stop_name`, optional `ring: true`, optional `routes:` list of route_short_names). A triplet is
   consistent if one corridor on the map holds its non-NULL stops in order, either direction; NULL and
@@ -129,7 +127,7 @@ need to be kept up to date by hand whenever the map changes.
   | `--schema` | *Required* | Snapshot schema, e.g. `gtfs_20260921` |
   | `--corridors` | `config/map_corridors.yml` | Path to the corridor definitions |
 
-- `check_map_service_patterns.py`: print-only. Checks view
+#### `check_map_service_patterns.py`: print-only. Checks view
   `service_pattern` against `config/map_service_patterns.yml`, a sparse per-route exception list
   (every stop a route serves is assumed `default: all_times` unless listed). Every route of every
   `agencies:` entry is checked (S-tog/Metro), whether or not it's mentioned under `routes:` — so an
@@ -169,7 +167,7 @@ Download the GTFS zip from Rejseplanen Labs (requires authorization, see [Data](
 
 ### 2. Load and derive
 ```bash
-python load_gtfs.py --gtfs-dir <data/GTFS_2026-10-01> --snapshot-date 2026-10-01 --polygon config/cph_area.geojson
+python load_gtfs.py --gtfs-dir data/GTFS_2026-10-01 --snapshot-date 2026-10-01
 python create_views.py --schema gtfs_20261001
 python derive_route_patterns.py --schema gtfs_20261001
 python derive_service_pattern.py --schema gtfs_20261001
@@ -219,3 +217,29 @@ Compare on names and `route_short_name`, not IDs. It is not yet verified that `s
   nothing reads it yet. Could be used to check rail-to-rail interchanges against the map's drawn
   connections (e.g. Nørreport St. ↔ Nørreport St. (Metro)).
 - Other diffing/exploratory SQL queries to aid understanding of the network.
+
+## Definitions
+
+### Trip pattern
+
+A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `route_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. Branches and short-turns of the same route/direction show up as separate rows, so a route/direction with several rows is worth a look. Patterns are keyed on the stop sequence alone, so one added stop or a new short-turn variant makes a new pattern even when the network barely changed. Left out are pass-through stops (no pickup and no drop-off), trips whose service has an all-zero weekly calendar, and patterns that never touch the Copenhagen area. A route that only partly overlaps the area is kept in full, with `stop_in_cph_area` marking which stops are in scope. `pattern_id` is just a row identifier within one snapshot, so it can't be used to match patterns between snapshots.
+
+### Triplets
+
+Triplets (prev, stop, next) are the unit for map checks and snapshot diffing. Triplets only change where the topology does, so a diff between snapshots is a plain `EXCEPT` and a map check can ask whether each triplet's stops sit in order on some corridor, with no need to split patterns at junctions. Unlike pairwise edges, triplets also keep which through-movements exist at a junction (lines A-X-C and B-X-D meeting at X do not imply A-X-B). The trade-offs: skip-stop and express variants add triplets (A-C-E) that aren't topology, so read diffs with that in mind. Termini and out-of-area neighbours are NULL wildcards, so line ends are checked more loosely. `pattern_id` stays on each row so any suspicious triplet can be traced back to its full pattern in `route_patterns`.
+
+### Corridor
+
+A corridor is one line as drawn on the map, written out in `config/map_corridors.yml` as its complete stop list in order, at maximum length (every stop the line has anywhere, not only those a given route serves). It is the map-side counterpart of a route pattern: patterns and triplets come from the feed, corridors are hand-encoded from what the map shows, and `check_map_corridors.py` compares the two. A triplet is consistent if its stops appear in order on one corridor, in either direction. Corridors belong to a group (`metro`, `stog`, `dsb`, `lokaltog`, `letbane`, defined by GTFS agency IDs) and may list the `routes` (by `route_short_name`) that run on them. A triplet is checked against its route's own corridors if the route is listed, otherwise against all corridors in its group. Stops are matched by exact `stop_name` (metro stations end in "(Metro)"), so a station renamed in the feed shows up as an unknown stop. A line that loops (e.g. M3) sets `ring: true`. Corridors may overlap: M1 and M2 each list the shared trunk from Vanløse to Christianshavn, because they are separate lines on the map. Because a corridor holds all the stops in order, a route that skips some of them is still consistent as long as it keeps the order.
+
+### Service pattern
+
+
+
+ 'peak_only'
+ 'weekend_only'
+ 'weekday_only'
+ 'weekend_and_evening_only'
+ 'weekend_and_daytime_only'
+ 'weekday_daytime_only'
+ 
