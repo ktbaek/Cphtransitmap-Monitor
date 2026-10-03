@@ -79,7 +79,7 @@ Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffin
 ## Concepts
 
 ### Trip pattern
-A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `trip_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. So all trips having the same stop pattern per `route_id` and direction constitute one trip pattern. Patterns are keyed on the stop sequence alone: headsign is ignored, and one added stop or a new short-turn variant makes a new pattern even when the network barely changed.
+A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `trip_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. So all trips having the same sequence of stops per `route_id` and direction constitute one trip pattern. Patterns are keyed on the stop sequence alone: headsign is ignored, and one added stop or a new short-turn variant makes a new pattern even when the network barely changed.
 
 Left out are pass-through stops (`pickup_type` and `drop_off_type` both `1`), trips whose service has an all-zero weekly calendar, and patterns that never touch the Copenhagen area. Trips that overlap the area are kept in full, with `stop_in_cph_area` marking which stops are in scope. `pattern_id` is just a row identifier within one snapshot, so it can't be used to match patterns between snapshots.
 
