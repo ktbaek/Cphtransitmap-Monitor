@@ -37,7 +37,18 @@ python derive_stop_triplets.py --schema gtfs_YYYYMMDD
 
 Each script needs the ones above it; the last two only need steps 1-3 and can run in either order. `load_gtfs.py` refuses to overwrite an existing schema. Use `--force` only if you want to drop and reload that snapshot.
 
-### 3. Check against the map
+### 3. Check the end date of the feed
+Check how long the current calendar is valid for:
+```sql
+SELECT min(start_date::date) AS first_day,
+       min(end_date::date)   AS earliest_end,
+       max(end_date::date)   AS latest_end
+FROM gtfs_<new>.calendar
+WHERE service_id IN (SELECT service_id FROM gtfs_<new>.regular_rail_trips);
+```
+If `earliest_end` is only weeks away, the next timetable isn't in this feed yet, so note it and plan to re-fetch once the new one is published. If `first_day` is in the future, the feed describes an upcoming timetable, so compare it against the map with that in mind.
+
+### 4. Check against the map
 ```bash
 python check_map_corridors.py --schema gtfs_YYYYMMDD
 python check_map_service_patterns.py --schema gtfs_YYYYMMDD
@@ -51,7 +62,7 @@ Both scripts only print. Read the output for:
 
 *Known false positives*: Høvelte St., early morning trips of S-tog route H to Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
 
-### 4. Compare with the previous snapshot
+### 5. Compare with the previous snapshot
 Keep the previous snapshot's schema in the database until this step is done, and compare by hand with `EXCEPT` queries across the two schemas, for example on triplet presence:
 ```sql
 -- triplets in the new snapshot but not in the old one (swap the two for removals)
@@ -63,11 +74,12 @@ FROM gtfs_<previous>.stop_triplets;
 ```
 Compare on names and `route_short_name`, not IDs. Do the same for `stop_service_pattern` to catch line extensions and truncations.
 
-### 5. Update the map and record the result
+### 6. Update the map and record the result
 1. Decide per finding whether the feed or the map is right, then update the map.
 2. Edit `config/map_corridors.yml` and `config/map_service_patterns.yml` to match what the map now shows (see [Config files](#config-files)). 
-3. Re-run step 3. A clean result means the YAML files and the new snapshot agree.
+3. Re-run step 4. A clean result means the YAML files and the new snapshot agree.
 4. Commit the YAML changes.
+
 
 ## Pipeline
 Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffing is cross-schema SQL. Raw tables are loaded with `COPY` and every column is stored as `text`; cast explicitly when needed (see [Gotchas](#gotchas)).
@@ -267,7 +279,7 @@ routes:
 - `transfers.txt` is loaded (`load_gtfs.py`'s `GTFS_FILES`) into a raw `transfers` table, but
   nothing reads it yet. Could be used to check rail-to-rail interchanges against the map's drawn
   connections (e.g. Nørreport St. ↔ Nørreport St. (Metro)).
-- A snapshot diff script, replacing the manual `EXCEPT` queries in [step 4](#4-compare-with-the-previous-snapshot).
+- A snapshot diff script, replacing the manual `EXCEPT` queries in [step 5](#5-compare-with-the-previous-snapshot).
 - Other diffing/exploratory SQL queries to aid understanding of the network.
 
 ## License
