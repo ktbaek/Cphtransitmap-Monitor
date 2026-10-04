@@ -37,8 +37,8 @@ python derive_stop_triplets.py --schema gtfs_YYYYMMDD
 
 Each script needs the ones above it; the last two only need steps 1-3 and can run in either order. `load_gtfs.py` refuses to overwrite an existing schema. Use `--force` only if you want to drop and reload that snapshot.
 
-### 3. Check the end date of the feed
-Check how long the current calendar is valid for:
+### 3. Check start and end date of the feed
+
 ```sql
 SELECT min(start_date::date) AS first_day,
        min(end_date::date)   AS earliest_end,
