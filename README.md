@@ -270,7 +270,7 @@ routes:
 ```
 
 ## Gotchas
-- **Stop name signifiers.** Stop names in the feed may add signifiers, e.g. "(Metro)" as in "Nørreport St. (Metro)", or "(Hillerød)" for some Lokaltog stops as in "Kagerup St. (Hillerød)".
+- **Stop name signifiers.** Stop names in the feed may add signifiers, e.g. "(Metro)" as in "Nørreport St. (Metro)", or e.g. "(Hillerød)" for some Lokaltog stops as in "Kagerup St. (Hillerød)".
 - **Text columns.** Every raw column is `text`, so cast before comparing or sorting (`stop_sequence::int`, `route_type::int`, `stop_lat::float`). Ordering by `stop_sequence` without the cast sorts lexicographically and scrambles patterns with 10+ stops (already fixed in `derive_trip_patterns.py`).
 - **Holidays are not modeled.** `calendar_dates.txt` is not read, so holiday timetables don't affect `stop_service_pattern`.
 - **Høvelte St.** appears in the feed as a stop but is intentionally not shown on the map.
