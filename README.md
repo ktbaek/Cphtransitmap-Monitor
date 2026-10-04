@@ -14,11 +14,6 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Dependencies:
-- `psycopg2` (or `psycopg2-binary`) — database connection
-- `PyYAML` — reading the `config/*.yml` files
-- `shapely` — point-in-polygon checks for the Copenhagen area and GeoJSON export grouping
-
 Connection settings go in `config/db.yml` (block `default`; password optional, falls back to `PGPASSWORD`). The database must already exist.
 
 ```yaml
