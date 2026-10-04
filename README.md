@@ -49,7 +49,7 @@ Both scripts only print. Read the output for:
 - **Listed routes with no triplets**: usually a typo, a renamed route_short_name, or a route that's been discontinued.
 - **Service category mismatches**: a change in frequency pattern for a stop.
 
-*Known false positives*: Høvelte St., early morning trips of S-tog route H `#ff6641` to Frederikssund St., afternoon trips of S-tog route F `#ffc900` to Klampenborg St. See [Gotchas](#gotchas).
+*Known false positives*: Høvelte St., early morning trips of S-tog route H to Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
 
 ### 4. Compare with the previous snapshot
 Keep the previous snapshot's schema in the database until this step is done, and compare by hand with `EXCEPT` queries across the two schemas, for example on triplet presence:
