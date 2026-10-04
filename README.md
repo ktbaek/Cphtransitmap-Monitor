@@ -84,7 +84,7 @@ A trip pattern is one distinct ordered sequence of stops that trips on a route r
 
 Left out are pass-through stops (`pickup_type` and `drop_off_type` both `1`), trips whose service has an all-zero weekly calendar, and patterns that never touch the Copenhagen area. Trips that overlap the area are kept in full, with `stop_in_cph_area` marking which stops are in scope. `pattern_id` is just a row identifier within one snapshot, so it can't be used to match patterns between snapshots.
 
-### Triplets
+### Stop triplets
 Triplets (prev, stop, next) are the unit for map checks and snapshot diffing. `stop_triplets` has one row per (pattern, position), each attributed to the route it comes from. `pattern_id` stays on each row, so any suspicious triplet can be traced back to its full pattern in `trip_patterns`. Termini and out-of-area neighbours are NULL wildcards, so line ends are checked more loosely.
  
 A map check can ask whether each triplet's stops sit in order on some corridor, with no need to split patterns at junctions. Unlike pairwise edges, triplets also keep which through-movements exist at a junction (lines A-X-C and B-X-D meeting at X do not imply A-X-B).
