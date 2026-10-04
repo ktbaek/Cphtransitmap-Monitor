@@ -6,16 +6,28 @@ This project detects changes to the Copenhagen-area rail network using a [GTFS](
 Access to the data requires authorization from Rejseplanen Labs. The GTFS data is not included in this repository and is subject to Rejseplanen Labs' terms. Unzipped feeds go in `data/`.
 
 ## Setup
-Python 3.9+ and PostgreSQL (no PostGIS needed). Dependencies:
+Python 3.14 and PostgreSQL 17.9 (no PostGIS needed). 
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Dependencies:
 - `psycopg2` (or `psycopg2-binary`) — database connection
 - `PyYAML` — reading the `config/*.yml` files
 - `shapely` — point-in-polygon checks for the Copenhagen area and GeoJSON export grouping
 
-```bash
-pip install psycopg2-binary PyYAML shapely
-```
-
 Connection settings go in `config/db.yml` (block `default`; password optional, falls back to `PGPASSWORD`). The database must already exist.
+
+```yaml
+default:
+  host: localhost
+  port: 5432
+  dbname: <gtfs>
+  user: <user>
+```
 
 Area polygons live in `config/` as GeoJSON files.
 
@@ -60,7 +72,7 @@ Both scripts only print. Read the output for:
 - **Listed routes with no triplets**: usually a typo, a renamed route_short_name, or a route that's been discontinued.
 - **Service category mismatches**: a change in frequency pattern for a stop.
 
-*Known false positives*: Høvelte St., early morning trips of S-tog route H to Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
+*Known false positives*: Høvelte St., early morning trips of S-tog route H from Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
 
 ### 5. Compare with the previous snapshot
 Keep the previous snapshot's schema in the database until this step is done, and compare by hand with `EXCEPT` queries across the two schemas, for example on triplet presence:
