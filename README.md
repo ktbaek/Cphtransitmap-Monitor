@@ -24,7 +24,7 @@ Area polygons live in `config/` as GeoJSON files.
 Dates: `YYYY-MM-DD` in the feed folder name and `--snapshot-date`, `YYYYMMDD` in the schema name (`gtfs_YYYYMMDD`). Replace them with the date of the feed you downloaded.
 
 ### 1. Get and unpack the feed
-Download the GTFS zip from Rejseplanen Labs (requires authorization, see [Data](#data)) and unzip it into `<data/GTFS_YYYY-MM-DD/>`. Check that the expected `.txt` files are present. Keep the zip: the diff in step 4 needs the previous snapshot, and a replaced feed may not be downloadable again.
+Download the GTFS zip from Rejseplanen Labs (requires authorization, see [Data](#data)) and unzip it into `<data/GTFS_YYYY-MM-DD/>`. Check that the expected `.txt` files are present.
 
 ### 2. Load and derive
 ```bash
@@ -45,7 +45,8 @@ python check_map_service_patterns.py --schema gtfs_YYYYMMDD
 Both scripts only print. Read the output for:
 - **Unknown stops** (in `config/map_corridors.yml` but not in the feed, or the reverse): usually a renamed, new or closed station.
 - **Conflicts**: a triplet the map's corridors can't explain, meaning routing has changed or the map is wrong.
-- **Corridor stops not served**: a closed station, or a line truncated on the map's side.
+- **Unserved corridor stops**: usually a closed station still drawn on the map, a name mismatch, or a route that no longer stops there.
+- **Listed routes with no triplets**: usually a typo, a renamed route_short_name, or a route that's been discontinued.
 - **Service category mismatches**: a change in frequency pattern for a stop.
 
 *Known false positives*: Høvelte St., early morning trips of S-tog route H to Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
@@ -60,7 +61,7 @@ EXCEPT
 SELECT <route_short_name, prev_stop_name, stop_name, next_stop_name>
 FROM gtfs_<previous>.stop_triplets;
 ```
-Compare on names and `route_short_name`, not IDs. It is not yet verified that `stop_id` and `route_id` stay stable between exports. Do the same for `stop_service_pattern` to catch line extensions and truncations.
+Compare on names and `route_short_name`, not IDs. Do the same for `stop_service_pattern` to catch line extensions and truncations.
 
 ### 5. Update the map and record the result
 1. Decide per finding whether the feed or the map is right, then update the map.
@@ -69,33 +70,27 @@ Compare on names and `route_short_name`, not IDs. It is not yet verified that `s
 4. Commit the YAML changes.
 
 ## Pipeline
-Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffing is cross-schema SQL. Raw tables are loaded with `COPY` and every column is stored as `text`; cast explicitly when needed (see [Gotchas](#gotchas)). Each step narrows the data a bit further:
+Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffing is cross-schema SQL. Raw tables are loaded with `COPY` and every column is stored as `text`; cast explicitly when needed (see [Gotchas](#gotchas)).
 1. **Raw tables** hold every row from the feed as-is. Bus, ferry, and long-distance rail outside the area are all still there.
 2. **`rail_*` views** (`create_views.py`) narrow to rail route types only, with no area restriction yet. They include `rail_stops`, `rail_trips`, and `regular_rail_trips` (`rail_trips` without exception-only services).
-3. **`stops.in_cph_area`** is a flag, not a filter: a stop is inside if its coordinates fall in the polygon `config/cph_area.geojson` (`shapely` point-in-polygon). Every stop keeps its row, so a regional line's full extent stays visible while it's still clear which of its stops are in scope. There are no hand-maintained station lists, so new stations classify themselves.
-4. **Derived tables** (`trip_patterns`, `stop_service_pattern`, `stop_triplets`) apply the real content filters: pass-through stops and exception-only services are dropped, and only patterns that touch the Copenhagen area are kept. Details under [Trip pattern](#trip-pattern).
+3. **`stops.in_cph_area`** is a flag, not a filter: a stop is inside if its coordinates fall in the polygon `config/cph_area.geojson` (`shapely` point-in-polygon). There are no hand-maintained station lists, so new stations classify themselves.
+4. **Derived tables** (`trip_patterns`, `stop_service_pattern`, `stop_triplets`) apply content filters: pass-through stops and exception-only services are dropped, and only patterns that touch the Copenhagen area are kept. Details under [Trip pattern](#trip-pattern).
 
 
 ## Concepts
 
 ### Trip pattern
-A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `trip_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. So all trips having the same sequence of stops per `route_id` and direction constitute one trip pattern. Patterns are keyed on the stop sequence alone: headsign is ignored, and one added stop or a new short-turn variant makes a new pattern even when the network barely changed.
+A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `trip_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. In other words, all trips having the same sequence of stops per `route_id` and direction constitute one trip pattern. 
 
 Left out are pass-through stops (`pickup_type` and `drop_off_type` both `1`), trips whose service has an all-zero weekly calendar, and patterns that never touch the Copenhagen area. Trips that overlap the area are kept in full, with `stop_in_cph_area` marking which stops are in scope. `pattern_id` is just a row identifier within one snapshot, so it can't be used to match patterns between snapshots.
 
 ### Triplets
 Triplets (prev, stop, next) are the unit for map checks and snapshot diffing. `stop_triplets` has one row per (pattern, position), each attributed to the route it comes from. `pattern_id` stays on each row, so any suspicious triplet can be traced back to its full pattern in `trip_patterns`. Termini and out-of-area neighbours are NULL wildcards, so line ends are checked more loosely.
  
-<details>
-<summary>Why triplets</summary>
-A trip pattern changes as a whole whenever any stop changes. Triplets only change where the topology does, so a diff between snapshots is a plain `EXCEPT`, and a map check can ask whether each triplet's stops sit in order on some corridor, with no need to split patterns at junctions. Unlike pairwise edges, triplets also keep which through-movements exist at a junction (lines A-X-C and B-X-D meeting at X do not imply A-X-B).
+A map check can ask whether each triplet's stops sit in order on some corridor, with no need to split patterns at junctions. Unlike pairwise edges, triplets also keep which through-movements exist at a junction (lines A-X-C and B-X-D meeting at X do not imply A-X-B).
  
-The trade-offs: express (skip-stop) variants add triplets (A-C-E) that aren't topology, so read diffs with that in mind, and the NULL wildcards at line ends weaken the check there.
-</details>
-
-
 ### Corridor
-A corridor is one line as drawn on the map, written out in `config/map_corridors.yml` as its complete stop list in order, at maximum length (every stop the line has anywhere, not only those a given route serves). It is the map-side counterpart of a trip pattern: patterns and triplets come from the feed, corridors are hand-encoded from what the map shows, and `check_map_corridors.py` compares the two. 
+A corridor is one line as drawn on the map, written out in `config/map_corridors.yml` as its complete stop list in order, at maximum length. 
 
 A triplet is consistent if its stops appear in order on one corridor, in either direction. Corridors belong to a group (`metro`, `stog`, `dsb`, `lokaltog`, `letbane`, defined by GTFS agency IDs) and may list the `routes` (by `route_short_name`) that run on them. A triplet is checked against its route's own corridors if the route is listed, otherwise against all corridors in its group. Stops are matched by exact `stop_name` (metro stations end in "(Metro)"), so a station renamed in the feed shows up as an unknown stop. A line that loops (e.g. M3) sets `ring: true`. Corridors may overlap: M1 and M2 each list the shared trunk from Vanløse to Christianshavn, because they are separate lines on the map.
 
