@@ -70,7 +70,7 @@ group if it lists none. Usually a closed station still drawn on the map, a name 
 
 *Known false positives*: Høvelte St., early morning trips of S-tog route H from Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
 
-### 5. Compare with the previous snapshot
+### 5. Compare with the previous snapshot (optional)
 Keep the previous snapshot's schema in the database until this step is done, and compare by hand with `EXCEPT` queries across the two schemas, for example on triplet presence:
 ```sql
 -- triplets in the new snapshot but not in the old one (swap the two for removals)
@@ -93,7 +93,7 @@ Compare on names and `route_short_name`, not IDs. Do the same for `stop_service_
 Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffing is cross-schema SQL. Raw tables are loaded with `COPY` and every column is stored as `text`; cast explicitly when needed (see [Gotchas](#gotchas)).
 1. **Raw tables** hold every row from the feed as-is. Bus, ferry, and long-distance rail outside the area are all still there.
 2. **`rail_*` views** (`create_views.py`) narrow to rail route types only, with no area restriction yet. They include `rail_stops`, `rail_trips`, and `regular_rail_trips` (`rail_trips` without exception-only services).
-3. **`stops.in_cph_area`** is a flag, not a filter: a stop is inside if its coordinates fall in the polygon `config/cph_area.geojson` (`shapely` point-in-polygon). There are no hand-maintained station lists, so new stations classify themselves.
+3. **`stops.in_cph_area`** is a flag, not a filter: a stop is inside if its coordinates fall in the polygon `config/cph_area.geojson` (`shapely` point-in-polygon).
 4. **Derived tables** (`trip_patterns`, `stop_service_pattern`, `stop_triplets`) apply content filters: pass-through stops and exception-only services are dropped, and only patterns that touch the Copenhagen area are kept. Details under [Trip pattern](#trip-pattern).
 
 
@@ -283,6 +283,7 @@ routes:
 - **Text columns.** Every raw column is `text`, so cast before comparing or sorting (`stop_sequence::int`, `route_type::int`, `stop_lat::float`). Ordering by `stop_sequence` without the cast sorts lexicographically and scrambles patterns with 10+ stops (already fixed in `derive_trip_patterns.py`).
 - **Holidays are not modeled.** `calendar_dates.txt` is not read, so holiday timetables don't affect `stop_service_pattern`.
 - **Høvelte St.** appears in the feed as a stop but is intentionally not shown on the map.
+- **Shapes.** Not all shapes in the feed's `shapes.txt` provide geographical detail between stops.
 
 ## To do
 - `transfers.txt` is loaded (`load_gtfs.py`'s `GTFS_FILES`) into a raw `transfers` table, but
