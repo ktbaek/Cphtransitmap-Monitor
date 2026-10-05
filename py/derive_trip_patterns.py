@@ -25,13 +25,11 @@ stop_names.
 trip_headsign is not part of the grouping.
 
 Trips whose service_id has an all-zero weekly calendar (no day of the week
-set) are excluded — these are typically services defined purely through
+set) are excluded by using view regular_rail_trips (see create_views.py) 
+These are typically services defined purely through
 one-off calendar_dates.txt exceptions (holiday specials, event trains)
 rather than a recurring pattern, and aren't representative of the network's
-regular topology. (Confirmed for this feed: every trip's service_id has a
-calendar.txt row, so this is a plain INNER JOIN — if that ever changes,
-double check services that exist only in calendar_dates.txt aren't being
-silently dropped too.)
+regular topology.
 
 Only patterns that touch the area at all are kept — a route entirely
 outside Copenhagen (fully-external DSB regional/IC lines, mainly) is
