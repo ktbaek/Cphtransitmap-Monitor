@@ -2,25 +2,19 @@
 """
 derive_stop_triplets.py
 
-Builds (prev_stop, stop, next_stop) triplets from trip_patterns — a plain
-A-B edge can't tell you which through-combinations actually exist at a
-junction where multiple lines cross (e.g. lines A-X-C and B-X-D meet at X,
-but A-X-B, B-X-C, C-X-D, D-X-A don't exist even though the track layout
-could support them). A triplet disambiguates this by keeping one stop of
-context on each side.
+Builds (prev_stop, stop, next_stop) triplets from trip_patterns.
 
 Requires "{schema}".trip_patterns to already exist (run
 derive_trip_patterns.py first) — triplets are built from it, so they
 inherit every filter already baked into that table: area restriction,
-pass-through-stop exclusion, and the calendar-based exclusion of
+pass-through-stop exclusion, and calendar-based exclusion of
 exception-only services.
 
 Creates one table:
 
   stop_triplets — one row per (pattern, position), keeping
-      route_id/direction_id/pattern_id so you can attribute a given
-      transition to a specific route. The first stop of a pattern has
-      prev_stop_id = NULL, the last has next_stop_id = NULL — these NULLs
+      route_id/direction_id/pattern_id. The first stop of a pattern has
+      prev_stop_id = NULL, the last has next_stop_id = NULL. These NULLs
       are meaningful (route termini), not missing data, and are kept
       rather than filtered out, since a terminus changing between
       snapshots is itself a real network change.
@@ -41,15 +35,15 @@ def derive_stop_triplets(conn, schema: str):
             CREATE TABLE "{schema}".stop_triplets AS
             WITH pattern_stops AS (
                 SELECT
-                    rp.pattern_id,
-                    rp.route_id,
-                    rp.route_short_name,
-                    rp.direction_id,
-                    rp.n_trips,
+                    tp.pattern_id,
+                    tp.route_id,
+                    tp.route_short_name,
+                    tp.direction_id,
+                    tp.n_trips,
                     u.stop_id,
                     u.ord
-                FROM "{schema}".trip_patterns rp,
-                     unnest(rp.stop_ids) WITH ORDINALITY AS u(stop_id, ord)
+                FROM "{schema}".trip_patterns tp,
+                     unnest(tp.stop_ids) WITH ORDINALITY AS u(stop_id, ord)
             )
             SELECT
                 curr.route_id,
