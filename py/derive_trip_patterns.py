@@ -72,20 +72,11 @@ def derive_trip_patterns(conn, schema: str):
                     array_agg(s.stop_name ORDER BY st.stop_sequence::int) AS stop_names,
                     array_agg(s.in_cph_area ORDER BY st.stop_sequence::int) AS stop_in_cph_area,
                     bool_or(s.in_cph_area) AS touches_cph_area
-                FROM "{schema}".rail_trips t
+                FROM "{schema}".regular_rail_trips t
                 JOIN "{schema}".stop_times st USING (trip_id)
                 JOIN "{schema}".stops s USING (stop_id)
                 JOIN "{schema}".routes r USING (route_id)
-                JOIN "{schema}".calendar c USING (service_id)
-                WHERE (
-                    c.monday = '1' OR
-                    c.tuesday = '1' OR
-                    c.wednesday = '1' OR
-                    c.thursday = '1' OR
-                    c.friday = '1' OR
-                    c.saturday = '1' OR
-                    c.sunday = '1'
-                ) AND NOT (
+                WHERE NOT (
                     COALESCE(NULLIF(st.pickup_type, ''), '0') = '1'
                     AND COALESCE(NULLIF(st.drop_off_type, ''), '0') = '1'
                 )
