@@ -3,7 +3,7 @@
 derive_trip_patterns.py
 
 Compute one row per distinct stop-sequence ("pattern") for every
-route/direction in a loaded GTFS snapshot schema — a trip pattern is
+route/direction in a loaded GTFS snapshot schema. A trip pattern is
 composed of all trips that are identical with regard to their stop
 sequence.
 
@@ -22,10 +22,7 @@ first_stop/last_stop are just stop_names[1]/stop_names[-1], kept as their
 own columns so a pattern's rough extent is visible without expanding
 stop_names.
 
-trip_headsign is NOT part of the grouping — two trips with an identical
-stop sequence count as the same pattern regardless of headsign (distinct
-branch names shown to passengers, say), since the stop sequence is what
-this table is keyed on.
+trip_headsign is not part of the grouping.
 
 Trips whose service_id has an all-zero weekly calendar (no day of the week
 set) are excluded — these are typically services defined purely through
@@ -49,7 +46,7 @@ pattern as far as a passenger-facing view is concerned — matches the same
 filter in derive_service_pattern.py.
 
 A route/direction with more than one row here has more than one distinct
-stop sequence in service (branches, short-turns, etc.) — worth a look.
+stop sequence in service (branches, skip-stop, short-turns, etc.).
 
 Usage:
     python derive_trip_patterns.py --schema gtfs_20260921

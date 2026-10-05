@@ -99,9 +99,9 @@ Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffin
 ## Concepts
 
 ### Trip pattern
-A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `trip_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. In other words, all trips having the same sequence of stops per `route_id` and direction constitute one trip pattern. 
+A trip pattern is one distinct ordered sequence of stops that trips on a route run in one direction. `trip_patterns` has one row per pattern, with the stops (ids, names, in-area flags) as arrays in visiting order, plus the trips that run it. In other words, a trip pattern is composed of all trips that are identical with regard to their stop sequence, direction and `route_id`.
 
-Left out are pass-through stops (`pickup_type` and `drop_off_type` both `1`), trips whose service has an all-zero weekly calendar, and patterns that never touch the Copenhagen area. Trips that overlap the area are kept in full, with `stop_in_cph_area` marking which stops are in scope. `pattern_id` is just a row identifier within one snapshot, so it can't be used to match patterns between snapshots.
+Importantly, pass-through stops (`pickup_type` and `drop_off_type` both `1`), trips whose service has an all-zero weekly calendar, and patterns that never touch the Copenhagen area are left out. Trips that overlap the area are kept in full, with `stop_in_cph_area` marking which stops are in scope. `pattern_id` is just a row identifier within one snapshot, so it can't be used to match patterns between snapshots.
 
 ### Stop triplets
 Triplets (prev, stop, next) are the unit for map checks and snapshot diffing. `stop_triplets` has one row per (pattern, position), each attributed to the route it comes from. `pattern_id` stays on each row, so any suspicious triplet can be traced back to its full pattern in `trip_patterns`. Termini and out-of-area neighbours are NULL wildcards, so line ends are checked more loosely.
