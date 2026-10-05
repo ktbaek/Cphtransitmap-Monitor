@@ -10,9 +10,7 @@ categories are actually served in this snapshot:
                                                     — not split by time of day)
 
 Holiday exceptions in calendar_dates.txt are NOT modeled here — only
-calendar.txt's regular weekly pattern is used. See project notes for why
-(the coarse weekly pattern is enough for a twice-a-year structural check;
-day-by-day holiday handling is a separate, more involved piece of work).
+calendar.txt's regular weekly pattern is used.
 
 Stores only rows that ARE served — a presence table. A stop's absence for
 a given (route_id, day_type, time_band) means "not served that way", which
