@@ -53,7 +53,7 @@ SELECT min(start_date::date) AS first_day,
 FROM gtfs_<new>.calendar
 WHERE service_id IN (SELECT service_id FROM gtfs_<new>.regular_rail_trips);
 ```
-If `earliest_end` is only weeks away, the next timetable isn't in this feed yet, so note it and plan to re-fetch once the new one is published. If `first_day` is in the future, the feed describes an upcoming timetable, so compare it against the map with that in mind.
+If `earliest_end` is only weeks away, the next timetable isn't in this feed yet, so plan to re-fetch once the new one is published. If `first_day` is in the future, the feed describes an upcoming timetable, so compare it against the map with that in mind.
 
 ### 4. Check against the map
 ```bash
@@ -279,11 +279,11 @@ routes:
 ```
 
 ## Gotchas
-- **Stop name signifiers.** Stop names in the feed may add signifiers, e.g. "(Metro)" as in "Nørreport St. (Metro)", or e.g. "(Hillerød)" for some Lokaltog stops as in "Kagerup St. (Hillerød)".
+- **Stop name signifiers.** Stop names in the feed may add signifiers, e.g. "(Metro)" as in "Nørreport St. (Metro)", or "(Hillerød)" for some Lokaltog stops as in "Kagerup St. (Hillerød)".
 - **Text columns.** Every raw column is `text`, so cast before comparing or sorting (`stop_sequence::int`, `route_type::int`, `stop_lat::float`). Ordering by `stop_sequence` without the cast sorts lexicographically and scrambles patterns with 10+ stops (already fixed in `derive_trip_patterns.py`).
 - **Holidays are not modeled.** `calendar_dates.txt` is not read, so holiday timetables don't affect `stop_service_pattern`.
 - **Høvelte St.** appears in the feed as a stop but is intentionally not shown on the map.
-- **Shapes.** Not all shapes in the feed's `shapes.txt` provide geographical detail between stops.
+- **Shapes.** When visually inspecting routes, note that not all shapes in the feed's `shapes.txt` provide geographical detail between stops.
 
 ## To do
 - `transfers.txt` is loaded (`load_gtfs.py`'s `GTFS_FILES`) into a raw `transfers` table, but
