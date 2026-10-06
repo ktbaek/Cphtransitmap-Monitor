@@ -4,6 +4,8 @@
 # Categories match view service_pattern's service_category:
 #   all_times, peak_only, weekend_only, weekend_and_evening_only,
 #   weekend_and_daytime_only, weekday_daytime_only, weekday_only
+mapversion: "1.4.1"
+
 default: all_times
 
 agencies:
