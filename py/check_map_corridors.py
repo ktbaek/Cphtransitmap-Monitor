@@ -17,10 +17,11 @@ ends are wildcards, so short-turns are never conflicts. Ring corridors
 (ring: true) may wrap around. Stops outside the Copenhagen area count as NULL,
 and triplets centred on one are skipped.
 
-Reports, per group: unknown stops (served, but on no corridor in scope),
-conflicts (all stops known, but no corridor in scope orders them) and unserved
-corridor stops (on the map, but not served by the corridor's routes, or by the
-group if it lists none). Groups without corridors are skipped. Print-only;
+Reports, per group: corridor stops not in the feed (closed/renamed station or
+typo), unknown stops (served, but on no corridor in scope), conflicts (all
+stops known, but no corridor in scope orders them) and unserved corridor stops
+(on the map, but not served by the corridor's routes, or by the group if it
+lists none). Groups without corridors are skipped. Print-only;
 requires stop_triplets (derive_stop_triplets.py).
 
 Usage:
@@ -85,9 +86,10 @@ def load_corridors(path: Path, name_to_ids):
             continue
         stop_names = [normalize_name(s) for s in spec["stops"]]
         index = {}
+        not_in_feed = []
         for pos, stop_name in enumerate(stop_names):
             if stop_name not in name_to_ids:
-                problems.append(f"{name}: stop name not in rail_stops: {stop_name}")
+                not_in_feed.append(stop_name)
                 continue
             for stop_id in name_to_ids[stop_name]:
                 index[stop_id] = pos
@@ -97,6 +99,7 @@ def load_corridors(path: Path, name_to_ids):
             "index": index,
             "ring_size": len(stop_names) if spec.get("ring") else None,
             "stops": stop_names,
+            "not_in_feed": not_in_feed,
             "routes": [str(r) for r in spec.get("routes") or []],
         }
         corridors[spec["group"]].append(corridor)
@@ -224,6 +227,12 @@ def print_report(per_group, unmapped_agencies, groups_without_corridors,
                 print(f"    [{scope}] {' -> '.join(name(s) for s in key)}  "
                       f"({', '.join(sorted(routes))}) {n_trips} trips")
 
+        missing = [(c["name"], stop_name) for c in corridors[group] for stop_name in c["not_in_feed"]]
+        if missing:
+            print("  Corridor stops not in feed (could be closed/renamed station or typo):")
+            for corridor_name, stop_name in missing:
+                print(f"    {corridor_name}: {stop_name}")
+
         unserved = []
         for c in corridors[group]:
             if c["routes"]:
@@ -231,7 +240,8 @@ def print_report(per_group, unmapped_agencies, groups_without_corridors,
             else:
                 served = g["served_group"]
             unserved += [(c["name"], stop_name) for stop_name in c["stops"]
-                         if not any(s in served for s in name_to_ids[stop_name])]
+                         if stop_name not in c["not_in_feed"]
+                         and not any(s in served for s in name_to_ids[stop_name])]
         if unserved:
             print("  Unserved corridor stops (on the map, not served by its routes/group):")
             for corridor_name, stop_name in unserved:
