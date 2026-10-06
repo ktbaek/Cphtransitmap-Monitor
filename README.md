@@ -2,6 +2,13 @@
 
 This project detects changes to the Copenhagen-area rail network using a [GTFS](https://gtfs.org) static feed from [Rejseplanen Labs](https://labs.rejseplanen.dk/). The goal is to maintain and update the customer-facing map [Copenhagen Transit Map](https://cphtransitmap.dk/en). The project contains tools that detect new/closed stations, changed routing, and changes in service pattern.
 
+## Status
+- **Map version:** see `mapversion` in config/map_*.yml.
+- **Map last synced to snapshot:** `<gtfs_YYYYMMDD>`
+- **Snapshot valid until:** `<YYYY-MM-DD>`
+
+Update these lines when you finish [step 6](#6-update-the-map-and-record-the-result).
+
 ## Data
 Access to the data requires authorization from Rejseplanen Labs. The GTFS data is not included in this repository and is subject to Rejseplanen Labs' terms. Unzipped feeds go in `data/`.
 
@@ -55,7 +62,19 @@ WHERE service_id IN (SELECT service_id FROM gtfs_<new>.regular_rail_trips);
 ```
 If `earliest_end` is only weeks away, the next timetable isn't in this feed yet, so plan to re-fetch once the new one is published. If `first_day` is in the future, the feed describes an upcoming timetable, so compare it against the map with that in mind.
 
-### 4. Check against the map
+### 4. Compare with the previous snapshot (optional)
+Keep the previous snapshot's schema in the database until this step is done, and compare by hand with `EXCEPT` queries across the two schemas, for example on triplet presence:
+```sql
+-- triplets in the new snapshot but not in the old one (swap the two for removals)
+SELECT <route_short_name, prev_stop_name, stop_name, next_stop_name>
+FROM gtfs_<new>.stop_triplets
+EXCEPT
+SELECT <route_short_name, prev_stop_name, stop_name, next_stop_name>
+FROM gtfs_<previous>.stop_triplets;
+```
+Compare on names and `route_short_name`, not IDs. Do the same for `stop_service_pattern` to catch line extensions and truncations.
+
+### 5. Check against the map
 ```bash
 python check_map_corridors.py --schema gtfs_YYYYMMDD
 python check_map_service_patterns.py --schema gtfs_YYYYMMDD
@@ -70,24 +89,13 @@ group if it lists none. Usually a closed station still drawn on the map, a name 
 
 *Known false positives*: Høvelte St., early morning trips of S-tog route H from Frederikssund St., afternoon trips of S-tog route F to Klampenborg St. See [Gotchas](#gotchas).
 
-### 5. Compare with the previous snapshot (optional)
-Keep the previous snapshot's schema in the database until this step is done, and compare by hand with `EXCEPT` queries across the two schemas, for example on triplet presence:
-```sql
--- triplets in the new snapshot but not in the old one (swap the two for removals)
-SELECT <route_short_name, prev_stop_name, stop_name, next_stop_name>
-FROM gtfs_<new>.stop_triplets
-EXCEPT
-SELECT <route_short_name, prev_stop_name, stop_name, next_stop_name>
-FROM gtfs_<previous>.stop_triplets;
-```
-Compare on names and `route_short_name`, not IDs. Do the same for `stop_service_pattern` to catch line extensions and truncations.
-
 ### 6. Update the map and record the result
-1. Decide per finding whether the feed or the map is right, then update the map.
-2. Edit `config/map_corridors.yml` and `config/map_service_patterns.yml` to match what the map now shows (see [Config files](#config-files)). 
-3. Re-run step 4. A clean result means the YAML files and the new snapshot agree.
-4. Commit the YAML changes.
-
+1. Create a branch for this snapshot: `git switch -c sync-gtfs_YYYYMMDD`. Until you merge it, `main` still describes the published map.
+2. Decide per finding whether the feed or the map is right.
+3. Edit `config/map_corridors.yml` and `config/map_service_patterns.yml` to describe the map as it *will* look after the update (see [Config files](#config-files)). Re-run [step 5](#5-check-against-the-map) until the checks come back clean. `git diff main` on the two files is now the list of changes to make on the map.
+4. Update the map, and check that it matches the YAML.
+5. When the updated map is published, bump `mapversion` in the YAML files, and update the [Status](#status) line, then commit: `git commit -am "Sync map to gtfs_YYYYMMDD (mapversion X.Y.Z)"`.
+6. Switch to main (`git switch main`), merge the branch (`git merge sync-gtfs_YYYYMMDD`) and then delete it (`git branch -d sync-gtfs_YYYYMMDD`). 
 
 ## Pipeline
 Each snapshot lives in its own Postgres schema, named `gtfs_YYYYMMDD`, so diffing is cross-schema SQL. Raw tables are loaded with `COPY` and every column is stored as `text`; cast explicitly when needed (see [Gotchas](#gotchas)).
