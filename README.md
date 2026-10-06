@@ -3,7 +3,7 @@
 This project detects changes to the Copenhagen-area rail network using a [GTFS](https://gtfs.org) static feed from [Rejseplanen Labs](https://labs.rejseplanen.dk/). The goal is to maintain and update the customer-facing map [Copenhagen Transit Map](https://cphtransitmap.dk/en). The project contains tools that detect new/closed stations, changed routing, and changes in service pattern.
 
 ## Status
-- **Map version:** see `mapversion` in config/map_*.yml.
+- **Map version:** see `mapversion` in `config/map_*.yml.`
 - **Map last synced to snapshot:** `<gtfs_YYYYMMDD>`
 - **Snapshot valid until:** `<YYYY-MM-DD>`
 
