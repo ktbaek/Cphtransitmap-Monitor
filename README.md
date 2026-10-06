@@ -80,10 +80,10 @@ python check_map_corridors.py --schema gtfs_YYYYMMDD
 python check_map_service_patterns.py --schema gtfs_YYYYMMDD
 ```
 Both scripts only print. Read the output for:
-- **Unknown stops** served, but on no map corridor in scope. Usually a renamed, new or closed station.
+- **Corridor stops not in feed**: a stop name in `map_corridors.yml` that isn't in the feed's `rail_stops`. Could be a closed or renamed station, or a typo in the corridor file. These stops are left out of the corridor's checks, so the other findings below still run.
+- **Unknown stops**: served, but on no map corridor in scope. Usually a new or renamed station. A rename often also appears under "Corridor stops not in feed" with the old name.
 - **Conflicts**: a triplet the map's corridors can't explain, meaning routing has changed or the map is wrong.
-- **Unserved corridor stops**: on the map, but not served by the corridor's routes, or by the
-group if it lists none. Usually a closed station still drawn on the map, a name mismatch, or a route that no longer stops there.
+- **Unserved corridor stops**: on the map and in the feed, but not served by the corridor's routes, or by the group if it lists none. Usually a station that has lost service but still exists in the feed, or a route that no longer stops there.
 - **Listed routes with no triplets**: usually a typo, a renamed route_short_name, or a route that's been discontinued.
 - **Service category mismatches**: a change in frequency pattern for a stop.
 
